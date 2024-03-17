@@ -1,0 +1,45 @@
+#include <SoftwareSerial.h>
+
+// Define GSM module connections
+#define GSM_TX_PIN 7
+#define GSM_RX_PIN 8
+
+SoftwareSerial gsmModule(GSM_TX_PIN, GSM_RX_PIN);
+
+// Define crash sensor pin
+int crashSensorPin = 2;
+
+void setup() {
+  pinMode(crashSensorPin, INPUT);
+  pinMode(GSM_TX_PIN, OUTPUT);
+  pinMode(GSM_RX_PIN, INPUT);
+  
+  Serial.begin(9600);
+  gsmModule.begin(9600);
+}
+
+void loop() {
+  if (digitalRead(crashSensorPin) == HIGH) {
+    sendAlertToHospitals();
+  }
+}
+
+void sendAlertToHospitals() {
+  // Get GPS location (simulated for demonstration)
+  float latitude = 37.7749;
+  float longitude = -122.4194;
+  
+  // Send SMS alert with location details
+  gsmModule.println("AT+CMGF=1"); // Set SMS mode to text
+  delay(1000);
+  gsmModule.println("AT+CMGS=\"HospitalPhoneNumber1\""); // Replace with hospital phone number
+  delay(1000);
+  gsmModule.print("Accident at Latitude: ");
+  gsmModule.print(latitude, 6);
+  gsmModule.print(", Longitude: ");
+  gsmModule.print(longitude, 6);
+  gsmModule.write(26); // Send Ctrl+Z to end SMS
+  delay(1000);
+  
+  // Repeat for other hospitals if needed
+}
